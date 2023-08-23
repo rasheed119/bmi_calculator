@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   IonApp,
   IonCol,
@@ -12,7 +12,13 @@ import {
   IonTitle,
   IonToolbar,
   setupIonicReact,
+  IonList,
+  IonListHeader,
+  IonRange,
+  IonText,
+  IonToggle,
 } from "@ionic/react";
+import type { ToggleCustomEvent } from "@ionic/react";
 import BMIController from "./components/BMIController";
 
 /* Core CSS required for Ionic components to work properly */
@@ -46,6 +52,34 @@ const App: React.FC = () => {
   const [BMI, set_BMI] = useState<number | string>("");
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [selectvalue, setselectvalue] = useState<"mkg" | "ftlg">("mkg");
+  const [themeToggle, setThemeToggle] = useState<boolean>(false);
+
+  const toggleChange = (ev: ToggleCustomEvent) => {
+    toggleDarkTheme(ev.detail.checked);
+  };
+
+  const toggleDarkTheme = (shouldAdd: boolean) => {
+    document.body.classList.toggle("dark", shouldAdd);
+  };
+
+  const initializeDarkTheme = (isDark: boolean) => {
+    setThemeToggle(isDark);
+    toggleDarkTheme(isDark);
+  };
+
+  useEffect(() => {
+    // Use matchMedia to check the user preference
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)");
+
+    // Initialize the dark theme based on the initial
+    // value of the prefers-color-scheme media query
+    initializeDarkTheme(prefersDark.matches);
+
+    // Listen for changes to the prefers-color-scheme media query
+    prefersDark.addEventListener("change", (mediaQuery) =>
+      initializeDarkTheme(mediaQuery.matches)
+    );
+  }, []);
 
   const Calculate_BMI = () => {
     const entered_weight = weight.current!.value;
@@ -91,6 +125,12 @@ const App: React.FC = () => {
       <IonHeader>
         <IonToolbar color="primary">
           <IonTitle>BMI Calculator</IonTitle>
+          <IonToggle
+            slot="end"
+            className="ion-margin"
+            checked={themeToggle}
+            onIonChange={toggleChange}
+          ></IonToggle>
         </IonToolbar>
       </IonHeader>
       <IonContent className="ion-padding">
